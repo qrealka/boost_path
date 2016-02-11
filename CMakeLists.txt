@@ -1,31 +1,32 @@
 cmake_minimum_required(VERSION 3.4)
 
-include("cmake/HunterGate.cmake")
-set(HUNTER_STATUS_DEBUG ON)
-set(HUNTER_PACKAGE_LOG_BUILD ON)
-#set(HUNTER_RUN_INSTALL ON)
-
-HunterGate(
-        URL "https://github.com/ruslo/hunter/archive/v0.10.9.tar.gz"
-        SHA1 "53b198e364dc7bc8360fc545f798563229bd7e20"
-)
-
 project(boost_path)
 
-# download boost
-hunter_add_package(Boost COMPONENTS system locale filesystem)
+# conan.io 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+CONAN_BASIC_SETUP()
 
 # now boost can be used
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost CONFIG REQUIRED system locale filesystem)
+find_package(Boost REQUIRED system locale filesystem)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(SOURCE_FILES main.cpp)
+
+if(MSVC)
+#  add_definitions(-DBOOST_ALL_NO_LIB)
+#  add_definitions(-DBOOST_ALL_DYN_LINK)
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
 
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
     add_executable(boost_path ${SOURCE_FILES})
-    target_link_libraries(boost_path PUBLIC Boost::system Boost::locale Boost::filesystem)
+#	message(STATUS "Link libraries: " ${Boost_LIBRARIES})
+    target_link_libraries(boost_path PUBLIC ${Boost_LIBRARIES})
+else()
+    add_executable(boost_path ${SOURCE_FILES})
+    target_link_libraries(boost_path PUBLIC ${CONAN_LIBS})
 endif()
