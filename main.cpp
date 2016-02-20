@@ -20,7 +20,7 @@ int main() {
 	std::wstring name(L"empty");
 
 #if _MSC_VER == 1900
-	std::experimental::filesystem::path p(u"пример.txt"); // 
+	auto p(std::experimental::filesystem::u8path(u8"\u043f\u0440\u0438\u0432\u0435\u0442.txt")); 
 	std::ofstream hello(p);
 	hello.imbue(std::locale());
 #else
